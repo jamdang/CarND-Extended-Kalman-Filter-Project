@@ -136,7 +136,11 @@ int main(int argc, char* argv[]) {
   for (size_t k = 0; k < N; ++k) {
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
-    fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
+	
+	// debug
+    // cout << "debug1: " << " loop " << k << endl;
+    
+	fusionEKF.ProcessMeasurement(measurement_pack_list[k]);
 
     // output the estimation
     out_file_ << fusionEKF.ekf_.x_(0) << "\t";
@@ -155,6 +159,41 @@ int main(int argc, char* argv[]) {
       float phi = measurement_pack_list[k].raw_measurements_(1);
       out_file_ << ro * cos(phi) << "\t"; // p1_meas
       out_file_ << ro * sin(phi) << "\t"; // ps_meas
+	  
+/* 	  // debug 
+	  cout << ".................................. " << endl;
+	  cout << "ground truth radar measurement: " << endl;
+	  // calc z_pred, i.e., predicted measurement
+	  float px = gt_pack_list[k].gt_values_(0);
+	  float py = gt_pack_list[k].gt_values_(1);
+	  float vx = gt_pack_list[k].gt_values_(2);
+	  float vy = gt_pack_list[k].gt_values_(3);
+	  
+	  float rho     = sqrt(px*px + py*py);
+	  //float phi;
+	  if (abs(px) < 1e-3){
+		  if (py > 1e-3){
+			  phi = PI/2;
+		  }else if(py < 1e-3){
+			  phi = -PI/2;
+		  }else{
+			  phi = 0.0f;
+		  }	  
+	  }else{
+		  phi = atan2(py,px);
+	  }
+
+	  float rho_dot;
+	  if (rho < 1e-3){
+		  rho_dot = 0.0f;
+	  }else{
+		  rho_dot = (px*vx + py*vy)/rho;
+	  }
+	  cout << rho << endl << phi << endl << rho_dot << endl;
+	  cout << "radar meas: " << endl;
+	  cout << measurement_pack_list[k].raw_measurements_ << endl;
+	  cout << ".................................. " << endl; */
+	  
     }
 
     // output the ground truth packages
@@ -165,6 +204,9 @@ int main(int argc, char* argv[]) {
 
     estimations.push_back(fusionEKF.ekf_.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
+	
+	//debug
+	//cout << "ground_truth: " << gt_pack_list[k].gt_values_ << endl;
   }
 
   // compute the accuracy (RMSE)
